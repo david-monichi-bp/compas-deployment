@@ -1,0 +1,33 @@
+image:
+  name: lfenergy/compas-scl-data-service
+  tag: 0.15.0-postgresql
+  pullPolicy: Always
+  pullSecret: docker-private-registry
+
+service:
+  port: 80
+  deployment:
+    port: 8090
+  environment:
+    public:
+      hostname: http://localhost:80
+      keycloak:
+        realm: compas
+
+runtime:
+  replicas: 1
+  restartPolicy: Always
+  readinessProbe:
+    initialDelaySeconds: 20
+    failureThreshold: 12
+  livenessProbe:
+    initialDelaySeconds: 20
+    failureThreshold: 12
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi

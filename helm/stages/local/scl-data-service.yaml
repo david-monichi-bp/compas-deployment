@@ -1,0 +1,4 @@
+service:
+  envs:
+    JWT_VERIFY_CLIENT_ID: scl-data-service
+    JWT_GROUPS_PATH: resource_access/scl-data-service/roles

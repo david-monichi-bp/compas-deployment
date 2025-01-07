@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Chart.Name }}
+spec:
+    replicas: {{ .Values.runtime.replicas }}
+    selector:
+        matchLabels:
+            io.compas.service: {{ .Chart.Name }}
+            io.compas.chart: {{ include "chart-name" . }}
+    template:
+        metadata:
+            labels:
+                io.compas.service: {{ .Chart.Name }}
+                io.compas.chart: {{ include "chart-name" . }}
+            annotations:
+                checksum/config: {{ .Values.service.environment | toYaml | sha256sum }}
+        spec:
+            restartPolicy: {{.Values.runtime.restartPolicy}}
+            imagePullSecrets:
+                - name: "{{ .Values.image.pullSecret }}"
+            containers:
+                - name: {{ .Chart.Name }}
+                  image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+                  imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  env:
+                    - name: KC_DB
+                      value: {{ .Values.service.environment.keycloak.db.database }}
+                    - name: KC_DB_URL
+                      value: jdbc:postgresql://postgres-keycloak/{{ .Values.service.environment.keycloak.db.database }}
+                    - name: KC_DB_USERNAME
+                      value: {{ .Values.service.environment.keycloak.db.username }}
+                    - name: KC_DB_PASSWORD
+                      value: {{ .Values.service.environment.keycloak.db.password }}
+                    - name: KC_DB_SCHEMA
+                      value: public
+                    - name: KC_HTTP_RELATIVE_PATH
+                      value: /auth
+                    - name: KEYCLOAK_ADMIN
+                      value: admin
+                    - name: KEYCLOAK_ADMIN_PASSWORD
+                      value: password
+                    - name: KEYCLOAK_FRONTEND_URL
+                      value: {{ .Values.global.hostname }}/auth/
+                    - name: KEYCLOAK_HTTP_PORT
+                      value: "{{ .Values.service.deployment.port }}"
+                    - name: PROXY_ADDRESS_FORWARDING
+                      value: "true"
+                  ports:
+                      - containerPort: {{ .Values.service.deployment.port }}
+                        protocol: TCP
+            volumeMounts:
+              - mountPath: /opt/keycloak/data/import
+                name: {{ .Chart.Name }}-config-files
+        volumes:
+          - configMap:
+              name: {{ .Chart.Name }}-cm
+            name: {{ .Chart.Name }}-config-files

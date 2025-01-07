@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Chart.Name }}
+spec:
+    replicas: {{ .Values.runtime.replicas }}
+    selector:
+        matchLabels:
+            io.compas.service: {{ .Chart.Name }}
+            io.compas.chart: {{ include "chart-name" . }}
+    template:
+        metadata:
+            labels:
+                io.compas.service: {{ .Chart.Name }}
+                io.compas.chart: {{ include "chart-name" . }}
+            annotations:
+                checksum/config: {{ .Values.service.environment | toYaml | sha256sum }}
+        spec:
+            restartPolicy: {{.Values.runtime.restartPolicy}}
+            imagePullSecrets:
+                - name: "{{ .Values.image.pullSecret }}"
+            containers:
+                - name: {{ .Chart.Name }}
+                  image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+                  imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  env:
+                      - name: JWT_GROUPS_PATH
+                        value: resource_access/scl-data-service/roles
+                      - name: JWT_VERIFY_CLIENT_ID
+                        value: scl-data-service
+                      - name: JWT_VERIFY_ISSUER
+                        value: http://{{ .Values.service.environment.public.hostname }}/auth/realms/{{ .Values.service.environment.public.keycloak.realm }}
+                      - name: JWT_VERIFY_KEY
+                        value: http://keycloak:8080/auth/realms/{{ .Values.service.environment.public.keycloak.realm }}/protocol/openid-connect/certs
+                      - name: POSTGRESQL_DB
+                        value: compas
+                      - name: POSTGRESQL_HOST
+                        value: postgresql
+                      - name: POSTGRESQL_PORT
+                        value: "5432"
+                      - name: USERINFO_NAME_CLAIMNAME
+                        value: name
+                      - name: USERINFO_SESSION_EXPIRES
+                        value: "30"
+                      - name: USERINFO_SESSION_WARNING
+                        value: "20"
+                      - name: USERINFO_WHO_CLAIMNAME
+                        value: name
+                  ports:
+                      - containerPort: {{ .Values.service.deployment.port }}
+                        protocol: TCP
+                  livenessProbe:
+                      httpGet:
+                          path: http://localhost:8080/compas-scl-data-service/q/health/ready
+                          port: {{ .Values.service.internalPort }}
+                      initialDelaySeconds: {{ .Values.runtime.livenessProbe.initialDelaySeconds }}
+                      failureThreshold: {{ .Values.runtime.livenessProbe.failureThreshold }}
+                  readinessProbe:
+                      httpGet:
+                          path: http://localhost:8080/compas-scl-data-service/q/health/ready
+                          port: {{ .Values.service.internalPort }}
+                      initialDelaySeconds: {{ .Values.runtime.readinessProbe.initialDelaySeconds }}
+                      failureThreshold: {{ .Values.runtime.readinessProbe.failureThreshold }}
+                  resources:
+                      {{- toYaml .Values.resources | nindent 22 }}

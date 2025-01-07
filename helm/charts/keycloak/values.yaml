@@ -1,0 +1,34 @@
+image:
+  name: keycloak/keycloak
+  tag: 26.0
+  pullPolicy: Always
+  pullSecret: docker-private-registry
+
+service:
+  port: 80
+  deployment:
+    port: 8080
+  environment:
+    public:
+      keycloak:
+        realm: compas
+    keycloak:
+      db:
+        database: keycloak
+        username: keycloak
+        password: weFSG7zn9VIOul3
+
+runtime:
+  replicas: 1
+  restartPolicy: Always
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1024Mi
+
+global:
+  hostname: http://localhost:80

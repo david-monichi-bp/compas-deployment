@@ -1,0 +1,47 @@
+helmDefaults:
+  createNamespace: false
+
+releases:
+  - name: keycloak
+    chart: ../charts/keycloak
+    values:
+      - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+      - ./{{ requiredEnv "STAGE_NAME" }}/keycloak.yaml
+
+  # - name: scl-data-service
+  #   chart: ../charts/scl-data-service
+  #   needs: [keycloak]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/scl-data-service.yaml
+  # - name: cim-mapping
+  #   chart: ../../charts/cim-mapping
+  #   needs: [keycloak]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/cim-mapping.yaml
+  # - name: scl-auto-alignment
+  #   chart: ../../charts/scl-auto-alignment
+  #   needs: [keycloak]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/scl-auto-alignment.yaml
+  # - name: scl-validator
+  #   chart: ../../charts/scl-validator
+  #   needs: [keycloak]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/scl-validator.yaml
+  # - name: open-scd
+  #   chart: ../../charts/open-scd
+  #   needs: [scl-data-service,cim-mapping,scl-auto-alignment,scl-validator]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/open-scd.yaml
+  # - name: reverse-proxy
+  #   chart: ../../charts/reverse-proxy
+  #   needs: [keycloak]
+  #   values:
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/stage.yaml
+  #     - ./{{ requiredEnv "STAGE_NAME" }}/reverse-proxy.yaml
+    # needs: [keycloak,open-scd,scl-data-service,cim-mapping,scl-auto-alignment,scl-validator]

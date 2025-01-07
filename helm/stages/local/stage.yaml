@@ -1,0 +1,11 @@
+global:
+  hostname: http://localhost:80
+
+service:
+  envs:
+    COMPAS_HOSTNAME: http://localhost:8080
+    JWT_VERIFY_KEY: http://keycloak:8080/auth/realms/compas/protocol/openid-connect/certs
+    JWT_VERIFY_ISSUER: http://${COMPAS_HOSTNAME}/auth/realms/compas
+    JWT_VERIFY_CLIENT_ID: scl-data-service
+    JWT_GROUPS_PATH: resource_access/scl-data-service/roles
+    USERINFO_WHO_CLAIMNAME: name
