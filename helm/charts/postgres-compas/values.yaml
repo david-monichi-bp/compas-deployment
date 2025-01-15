@@ -1,5 +1,5 @@
 image:
-  name: postgresql
+  name: postgres
   tag: 17-alpine
   pullPolicy: Always
   pullSecret: docker-private-registry

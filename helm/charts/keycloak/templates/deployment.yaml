@@ -23,9 +23,15 @@ spec:
                 - name: {{ .Chart.Name }}
                   image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
                   imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  args:
+                    - -v
+                    - start-dev
+                    - --hostname
+                    - {{ .Values.global.hostname }}
+                    - --import-realm
                   env:
                     - name: KC_DB
-                      value: {{ .Values.service.environment.keycloak.db.database }}
+                      value: {{ .Values.service.environment.keycloak.db.type }}
                     - name: KC_DB_URL
                       value: jdbc:postgresql://postgres-keycloak/{{ .Values.service.environment.keycloak.db.database }}
                     - name: KC_DB_USERNAME
@@ -49,10 +55,10 @@ spec:
                   ports:
                       - containerPort: {{ .Values.service.deployment.port }}
                         protocol: TCP
-            volumeMounts:
-              - mountPath: /opt/keycloak/data/import
+                  volumeMounts:
+                    - mountPath: /opt/keycloak/data/import
+                      name: {{ .Chart.Name }}-config-files
+            volumes:
+              - configMap:
+                  name: {{ .Chart.Name }}-cm
                 name: {{ .Chart.Name }}-config-files
-        volumes:
-          - configMap:
-              name: {{ .Chart.Name }}-cm
-            name: {{ .Chart.Name }}-config-files
